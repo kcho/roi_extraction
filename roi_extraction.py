@@ -1,7 +1,7 @@
 #!/Users/admin/anaconda/bin/python
 import os
 import re
-import pandas
+import pandas as pd
 import argparse
 
 def roi_extraction(subjectDir, roiName, roiNumber=False, outputDir=False):
@@ -14,6 +14,14 @@ def roi_extraction(subjectDir, roiName, roiNumber=False, outputDir=False):
     os.environ["FREESURFER_HOME"] = '/Applications/freesurfer'
     os.environ["SUBJECTS_DIR"] = '{0}'.format(subjectDir)
 
+    # FREESURFER vs freesurfer
+    freesurferDIR = re.search('freesurfer',
+            ' '.join(os.listdir(subjectDir)),
+            re.IGNORECASE).group(0)
+
+    inputName =  '{subjectDir}/{freesurferDir}/mri/aparc+aseg.mgz'.format(
+                subjectDir=subjectDir,
+                freesurferDir=freesurferDIR)
 
     # If the output directory is specified
     if outputDir:
@@ -28,22 +36,26 @@ def roi_extraction(subjectDir, roiName, roiNumber=False, outputDir=False):
 
     # If the number of the ROI is secificed
     if roiNumber:
-        command = 'mri_binarize --i {subjectDir}/freesurfer/mri/aparc+aseg.mgz \
+        command = 'mri_binarize --i {inputName} \
                                 --match {roiNumber} \
                                 --o {outputName}'.format(
-                                    subjectDir=subjectDir,
+                                    inputName=inputName,
                                     roiNumber=roiNumber,
                                     outputName=outputName)
 
     else:
         roiNameDictionary = pd.read_csv(
-            '/Volumes/CCNC_3T/KangIk/2014_05_DKI_project/FreeSurferColorLUT.txt',
+            '/Applications/freesurfer/FreeSurferColorLUT.txt',
+            skiprows=[0,1],
             sep = '\s+')[['Number','Label_Name:']]
-        roiNumber = ''.join(roiNameDictionary.set_index('Number').ix[roiName].get_values())
-        command = 'mri_binarize --i {subjectDir}/freesurfer/mri/aparc+aseg.mgz \
+
+        roiNumber = ''.join(
+                roiNameDictionary.set_index('Number').ix[roiName].get_values())
+
+        command = 'mri_binarize --i {inputName} \
                                 --match {roiNumber} \
                                 --o {outputName}'.format(
-                                    subjectDir=subjectDir,
+                                    inputName=inputName,
                                     roiNumber=roiNumber,
                                     outputName=outputName)
 
@@ -55,7 +67,7 @@ def roi_extraction(subjectDir, roiName, roiNumber=False, outputDir=False):
 if __name__ == "__main__" :
     parser = argparse.ArgumentParser(description='Extract ROI')
     parser.add_argument('-s', '--subjectDir', help='Subject directory', default=os.getcwd())
-    parser.add_argument('-r', '--roi', help='ROI name')
+    parser.add_argument('-r', '--roi', help='ROI name REQUIRED')
     parser.add_argument('-n', '--numb', help='ROI number', default=False)
     parser.add_argument('-o', '--output', help='Output location', default=False)
 
