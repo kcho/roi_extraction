@@ -68,7 +68,7 @@ if __name__ == "__main__" :
     parser = argparse.ArgumentParser(description='Extract ROI')
     parser.add_argument('-s', '--subjectDir', help='Subject directory', default=os.getcwd())
     parser.add_argument('-r', '--roi', help='ROI name REQUIRED')
-    parser.add_argument('-n', '--numb', help='ROI number', default=False)
+    parser.add_argument('-n', '--numb', help='ROI number eg)"49 51 52"', default=False)
     parser.add_argument('-o', '--output', help='Output location', default=False)
 
     args = parser.parse_args()
